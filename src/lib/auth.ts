@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import * as jose from "jose";
 import { authenticator } from "otplib";
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET;
@@ -7,7 +7,7 @@ if (!JWT_SECRET) {
   // Fail loudly at startup rather than silently signing tokens with `undefined`.
   throw new Error("NEXTAUTH_SECRET is not set. See .env.example.");
 }
-
+const secretKey = new TextEncoder().encode(JWT_SECRET);
 export interface SessionPayload {
   userId: string;
   tenantId: string;
@@ -21,19 +21,22 @@ export async function hashPassword(plain: string): Promise<string> {
 export async function verifyPassword(plain: string, hash: string): Promise<boolean> {
   return bcrypt.compare(plain, hash);
 }
-
-export function signSession(payload: SessionPayload): string {
-  return jwt.sign(payload, JWT_SECRET as string, { expiresIn: "7d" });
+export async function signSession(payload: SessionPayload): Promise<string> {
+  return new jose.SignJWT(payload as any)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("7d")
+    .sign(secretKey);
 }
 
-export function verifySession(token: string): SessionPayload | null {
+export async function verifySession(token: string): Promise<SessionPayload | null> {
   try {
-    return jwt.verify(token, JWT_SECRET as string) as SessionPayload;
+    const { payload } = await jose.jwtVerify(token, secretKey);
+    return payload as unknown as SessionPayload;
   } catch {
     return null;
   }
 }
-
 // ---- MFA (TOTP), required for super_admin per spec §13 ----
 export function generateMfaSecret(): string {
   return authenticator.generateSecret();

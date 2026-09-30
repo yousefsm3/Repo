@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const token = signSession({ userId: user.id, tenantId: user.tenant_id, role: user.role });
+  const token = await signSession({ userId: user.id, tenantId: user.tenant_id, role: user.role });
 
   const response = NextResponse.json({ message: "تم تسجيل الدخول" });
   response.cookies.set("session", token, {

@@ -1,7 +1,7 @@
 -- Wedding AI Platform — Phase 1 Database Schema
 -- PostgreSQL 16+ with pgvector extension
 
-CREATE EXTENSION IF NOT EXISTS pgvector;
+CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- =========================

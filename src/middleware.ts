@@ -8,7 +8,7 @@ const PUBLIC_PATHS = [
   "/kiosk/",
 ];
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
@@ -17,7 +17,7 @@ export function middleware(req: NextRequest) {
 
   if (pathname.startsWith("/api/") || pathname.startsWith("/dashboard")) {
     const token = req.cookies.get("session")?.value;
-    const session = token ? verifySession(token) : null;
+    const session = token ? await verifySession(token) : null;
 
     if (!session) {
       return NextResponse.json({ error: "غير مصرح" }, { status: 401 });

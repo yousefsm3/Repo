@@ -1,3 +1,22 @@
+modules = ["postgresql-16", "nodejs-24"]
+
 [nix]
 channel = "stable-25_05"
 packages = ["unzip"]
+
+run = "npm install && npm run dev"
+[deployment]
+build = ["sh", "-c", "npm install && npm run build"]
+run = ["sh", "-c", "npm start"]
+
+[[ports]]
+localPort = 3000
+externalPort = 80
+
+[[ports]]
+localPort = 3001
+externalPort = 3001
+
+[[ports]]
+localPort = 3002
+externalPort = 3002
